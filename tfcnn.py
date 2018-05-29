@@ -2,38 +2,13 @@
 import tensorflow as tf
 # from tensorflow.examples.tutorials.mnist import input_data
 import time
+from my_read_Data  import my_data_set,load_mnist
 
 
-import struct
-from glob import glob
-import os
-import numpy as np
-def load_mnist(path, kind='train'):
-    """Load MNIST data from `path`"""
-    images_path = glob('./%s/%s*3-ubyte' % (path, kind))[0]
-    labels_path = glob('./%s/%s*1-ubyte' % (path, kind))[0]
-    print(images_path, images_path)
-    with open(labels_path, 'rb') as lbpath:
-        magic, n = struct.unpack('>II',
-                                 lbpath.read(8))
-
-        labels = np.fromfile(lbpath,
-                             dtype=np.uint8)
-        x = np.zeros((labels.shape[0], 10))
-        for i in range(labels.shape[0]):
-            x[i][labels[i]] = 1
-        labels = np.array(x)
-    with open(images_path, 'rb') as imgpath:
-        magic, num, rows, cols = struct.unpack('>IIII',
-                                               imgpath.read(16))
-        images = np.fromfile(imgpath,
-                             dtype=np.uint8).reshape(len(labels), 784)
-        images=np.array(images)/255
-        print(images.shape)
-    return images, labels
 images, labels = load_mnist('./mnist')
 test_images, test_labels = load_mnist('./mnist', 't10k')
-
+train=my_data_set(images,labels)
+test=my_data_set(test_images,test_labels)
 
 """
 权重初始化
@@ -69,7 +44,7 @@ def max_pool_2x2(x):
 
 start = time.clock() #计算开始时间
 # mnist = input_data.read_data_sets(r'./mnist/', one_hot=True) #MNIST数据输入
-
+print(start)
 """
 第一层 卷积层
 
@@ -150,19 +125,23 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction,"float"))
 sess = tf.Session() #启动创建的模型
 sess.run(tf.initialize_all_variables()) #旧版本
 #sess.run(tf.global_variables_initializer()) #初始化变量
-batch_size=100
-for i in range(500): #开始训练模型，循环训练5000次
+batch_size=50
+for i in range(5000): #开始训练模型，循环训练5000次
     # batch = mnist.train.next_batch(50) #batch大小设置为50
-    batch_xs1 = images[i * batch_size:(i + 1) * batch_size]
-    batch_ys1 = labels[i * batch_size:(i + 1) * batch_size]
-    if i % 100 == 0:
+
+    # batch_xs1 = images[i * batch_size:(i + 1) * batch_size]
+    # batch_ys1 = labels[i * batch_size:(i + 1) * batch_size]
+    batch_xs1,batch_ys1=train.next_batch(50)
+    train_step.run(session=sess, feed_dict={x: batch_xs1, y_: batch_ys1,
+                                            keep_prob: 0.5})  # 神经元输出保持不变的概率 keep_prob 为0.5
+
+    if i % 100== 0  and i>1:
+        batch_xs2, batch_ys2 = test.next_batch(100)
         print("test accuracy %g" %accuracy.eval(session = sess,
                 feed_dict = {x:test_images, y_:test_labels,
                    keep_prob:1.0})) #神经元输出保持不变的概率 keep_prob 为 1，即不变，一直保持输出test_images, test_labels
-    train_step.run(session = sess, feed_dict = {x:batch_xs1, y_:batch_ys1,
-                   keep_prob:0.5}) #神经元输出保持不变的概率 keep_prob 为0.5
 
 
 
 end = time.clock() #计算程序结束时间
-print("running time is %g s") % (end-start)
+print("running time is %g s",(end-start)/60.0)
