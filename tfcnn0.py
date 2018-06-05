@@ -17,7 +17,7 @@ def bias_variable(shape):
 
 """
 卷积和池化，使用卷积步长为1（stride size）,0边距（padding size）
-池化用简单传统的2x2大小的模板做max pooling
+池化用简单传统的2x2大小的模板做max poolingfatal: Updating an unborn branch with changes added to the index.
 """
 def conv2d(x, W):
     return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding = 'SAME')
@@ -117,8 +117,8 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction,"float"))
 
 sess = tf.Session() #启动创建的模型
 sess.run(tf.initialize_all_variables()) #旧版本
-#sess.run(tf.global_variables_initializer()) #初始化变量
-
+#sess.run(tf.global_variables_initializer()) #初始化变量 
+#test
 for i in range(5000): #开始训练模型，循环训练5000次
     batch = mnist.train.next_batch(67) #batch大小设置为50
     if i % 100 == 0:
@@ -130,7 +130,7 @@ for i in range(5000): #开始训练模型，循环训练5000次
 
 print("test accuracy %g" %accuracy.eval(session = sess,
       feed_dict = {x:mnist.test.images, y_:mnist.test.labels,
-                   keep_prob:1.0})) #神经元输出保持不变的概率 keep_prob 为 1，即不变，一直保持输出
+                   keep_prob:1.0})) #神经元输出保持不变的概率 keep_prob 为 1，即不变，一直保持输出 
 
 end = time.clock() #计算程序结束时间
 print("running time is %g s",end-start)
